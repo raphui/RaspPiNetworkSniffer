@@ -56,7 +56,7 @@ int sniffDriver_sniff( struct sk_buff *skb , struct net_device *dev , struct pac
     unsigned char *ptr_dest;
     int len;
 
-    //struct sk_buff *sock_buff;
+    struct sk_buff *sock_buff;
 
     len = skb->len;
 
@@ -94,8 +94,8 @@ int sniffDriver_sniff( struct sk_buff *skb , struct net_device *dev , struct pac
 
                 printk( KERN_INFO "[+]%s: Modify of the header......", DRIVER_NAME );
 
-                /**
-                sock_buff = skb_copy( skb , GFP_ATOMIC );
+                //Use pskb_copy instead of skb_copy, because I just need to modify the header, so pskb_copy -> copy only header , data remains shared , skb_copy -> copy all.
+                sock_buff = pskb_copy( skb , GFP_ATOMIC );
 
                 ipH = ( struct iphdr *)sock_buff->network_header;
                 ptr_src = ( unsigned char * ) (&ipH->saddr);
@@ -109,7 +109,7 @@ int sniffDriver_sniff( struct sk_buff *skb , struct net_device *dev , struct pac
                 printk( KERN_INFO "[+]%s: Re-injecting the packet......." , DRIVER_NAME );
 
                 dev_queue_xmit( sock_buff );
-                **/
+
 
                 break;
 
@@ -122,6 +122,8 @@ int sniffDriver_sniff( struct sk_buff *skb , struct net_device *dev , struct pac
                 printk( KERN_INFO "[+]%s: %d.%d.%d.%d ==> %d.%d.%d.%d\n", DRIVER_NAME,
                             ptr_src[0] 	, ptr_src[1] 	, ptr_src[2] 	, ptr_src[3] ,
                             ptr_dest[0] 	, ptr_dest[1] 	, ptr_dest[2] 	, ptr_dest[3]);
+
+                break;
 
         default:
                 printk( KERN_INFO "[+]%s: ------------------ ethH->h_proto == %#x", DRIVER_NAME , ethH->h_proto );
